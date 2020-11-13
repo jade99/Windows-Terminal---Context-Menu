@@ -21,7 +21,7 @@ $HidePowershell = $false
 # ---- Uninstall Section ----
 
 # only reverts Windows Terminal key
-$uninstall = $true
+$uninstall = $false
 $enablePowershell = $false  <# permission issues, see above#>
 
 # ---- Debug ----
@@ -110,7 +110,7 @@ Function WriteRegFile {
             # Add key for command to execute
             Write-Verbose "`tconfiguring command..." -Verbose:$verbose
             "[HKEY_CLASSES_ROOT\Directory\Background\shell\Windows Terminal\shell\$($_.guid)\command]" | Out-File $OutFilePath -Append
-            "@=`"wt.exe -p $($_.guid) -d %V`"`n" | Out-File $OutFilePath -Append
+            "@=`"wt -p $($_.guid) -d \`"%V \`"`"`n" | Out-File $OutFilePath -Append
         }
 
 
