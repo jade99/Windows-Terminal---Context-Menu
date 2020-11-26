@@ -16,13 +16,13 @@ $ContextMenuShowIcon = $true
 
 # can cause permission issues
 # change yourself to owner of key [HKCR/Directory/Background/shell/Powershell] and give yourself write permission
-$HidePowershell = $false
+$HidePowershell = $true
+$HideWSL = $true
 
 # ---- Uninstall Section ----
 
 # only reverts Windows Terminal key
 $uninstall = $false
-$enablePowershell = $false  <# permission issues, see above#>
 
 # ---- Debug ----
 $verbose = $true
@@ -121,6 +121,14 @@ Function WriteRegFile {
             '"ShowBasedOnVelocityId"=-' | Out-File $OutFilePath -Append
             "`"HideBasedOnVelocityid`"=dword:00639bc8`n" | Out-File $OutFilePath -Append
         }
+
+        # Hide WSL if configured - see userconfig for permission info
+        if ($HideWSL) {
+            Write-Verbose "hiding WSL..." -Verbose:$verbose
+            "[HKEY_CLASSES_ROOT\Directory\Background\shell\WSL]" | Out-File $OutFilePath -Append
+            '"ShowBasedOnVelocityId"=-' | Out-File $OutFilePath -Append
+            "`"HideBasedOnVelocityid`"=dword:00639bc8`n" | Out-File $OutFilePath -Append
+        }
     } else {
         <# Uninstall branch #>
 
@@ -129,9 +137,17 @@ Function WriteRegFile {
         "[-HKEY_CLASSES_ROOT\Directory\Background\shell\Windows Terminal]`n" | Out-File $OutFilePath -Append
 
         # Re-enable powershell - see userconfig for permission info
-        if ($enablePowershell) {
+        if (-not $HidePowershell) {
             Write-Verbose "re-enabling powershell..." -Verbose:$verbose
             "[HKEY_CLASSES_ROOT\Directory\Background\shell\PowerShell]" | Out-File $OutFilePath -Append
+            "`"ShowBasedOnVelocityId`"=dword:00639bc8" | Out-File $OutFilePath -Append
+            "`"HideBasedOnVelocityid`"=-`n" | Out-File $OutFilePath -Append
+        }
+
+        # Re-enable WSL - see userconfig for permission info
+        if (-not $HideWSL) {
+            Write-Verbose "re-enabling WSL..." -Verbose:$verbose
+            "[HKEY_CLASSES_ROOT\Directory\Background\shell\WSL]" | Out-File $OutFilePath -Append
             "`"ShowBasedOnVelocityId`"=dword:00639bc8" | Out-File $OutFilePath -Append
             "`"HideBasedOnVelocityid`"=-`n" | Out-File $OutFilePath -Append
         }
